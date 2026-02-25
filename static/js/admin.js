@@ -185,7 +185,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
     map.setView([t.lat,t.lng], Math.max(map.getZoom(), 12));
   }
 
-  function escapeHtml(s){ return (s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m])); }
+  function escapeHtml(s){ return String((s ?? "")).replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m])); }
 
   function itemRow(t){
     const note=(t.note||"").trim();
