@@ -1,5 +1,7 @@
 // viewer.js — fixed: light popup + nice time + unlimited flight + mobile friendly
 document.addEventListener("DOMContentLoaded", ()=>{
+  const markers = new Map();
+ 
   const CENTER = [48.5231, 35.8707];
 
   const map = L.map('map', { zoomControl:true }).setView(CENTER, 11);
@@ -104,8 +106,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
   presencePing();
   setInterval(presencePing, 15000);
 
-  const markers = new Map();
-
+  
   function escapeHtml(s){return (s||"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));}
 
   function fmtTime(ts){
