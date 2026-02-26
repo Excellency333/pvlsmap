@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
   // theme is applied below
   const wm = document.getElementById("wmLayer");
-  if (wm) wm.dataset.theme = "dark";
+  if (wm){ wm.dataset.theme="dark"; wm.style.pointerEvents="none"; }
   setWatermarkTheme("dark"); // light map -> dark watermark
 
   const layers = L.control.layers({"Схема": baseLight, "Темна": baseDark}, {}, {collapsed:true});
@@ -123,17 +123,35 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
   function escapeHtml(s){return (s||"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));}
 
-  function popupHtml(t){
-    const name=TYPE_UA[t.type]||"Ціль";
-    const note=(t.note||"").trim();
-    return `<div style="min-width:200px">
-      <div style="font-weight:1000;margin-bottom:6px">${name}</div>
-      <div style="color:rgba(255,255,255,.70);font-size:12px;font-weight:800">Напрямок: ${dirToShort(t.direction||0)} • ${normDeg(t.direction||0)}°</div>
-      <div style="color:rgba(255,255,255,.70);font-size:12px;font-weight:800;margin-top:4px">Швидкість: ${(t.speed_kmh||0)} км/год</div>
-      ${note? `<div style="margin-top:8px;font-weight:800">${escapeHtml(note)}</div>`:""}
-      <div style="color:rgba(255,255,255,.55);font-size:11px;font-weight:800;margin-top:10px">${escapeHtml(t.created_at||"")}</div>
-    </div>`;
+function formatTs(s){
+  const ms = Date.parse(s||"");
+  if(isNaN(ms)) return String(s||"");
+  try{
+    const d = new Date(ms);
+    return d.toLocaleString(undefined, {hour:'2-digit', minute:'2-digit', second:'2-digit', day:'2-digit', month:'2-digit'}) ;
+  }catch(_){
+    return new Date(ms).toISOString();
   }
+}
+
+  function popupHtml(t){
+  const name = TYPE_UA[t.type] || "Ціль";
+  const note = (t.note || "").trim();
+  const dir = normDeg(t.direction||0);
+  const dirTxt = dirToShort(dir);
+  const sp = (t.speed_kmh ?? 0);
+  const created = t.created_at ? formatTs(t.created_at) : "";
+  return `
+    <div style="min-width:220px; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;">
+      <div style="font-weight:900;font-size:14px;margin-bottom:6px;color:#111">${escapeHtml(name)}</div>
+      <div style="font-size:12px;line-height:1.35;color:#222">
+        <div><b>Напрямок:</b> ${escapeHtml(dirTxt)} • ${dir}°</div>
+        <div style="margin-top:2px"><b>Швидкість:</b> ${escapeHtml(String(sp))} км/год</div>
+        ${note ? `<div style="margin-top:6px"><b>Нотатка:</b> ${escapeHtml(note)}</div>` : ``}
+        ${created ? `<div style="margin-top:8px;color:#555;font-size:11px">Додано: ${escapeHtml(created)}</div>` : ``}
+      </div>
+    </div>`;
+}
 
   function offset(latlng, deg, meters){
     const rad=deg*Math.PI/180;
@@ -167,16 +185,25 @@ document.addEventListener("DOMContentLoaded", ()=>{
       if(!alive.has(id)){ map.removeLayer(o.marker); map.removeLayer(o.line); markers.delete(id); }
     }
     for(const t of (list||[])) upsert(t);
-    const c=document.getElementById("count");
-    if(c) c.textContent=`Цілі: ${(list||[]).length}`;
+    
+const n = (list||[]).length;
+const c1 = document.getElementById("count");
+const c2 = document.getElementById("countTargets");
+const c3 = document.getElementById("targetsCount");
+if(c1) c1.textContent = `Цілі: ${n}`;
+if(c2) c2.textContent = String(n);
+if(c3) c3.textContent = `Цілі: ${n}`;
   }
 
   async function tick(){
-    try{
-      const data=await apiGet("/api/targets");
-      const u=document.getElementById("updated");
-      if(u) u.textContent=`Оновлено: ${data.updated_at}`;
-      sync(data.targets||[]);
+  try{
+    const data = await apiGet("/api/targets");
+    const u = document.getElementById("updated");
+    if(u){
+      const ts = data.updated_at || "";
+      u.textContent = ts ? `Оновлено: ${formatTs(ts)}` : "Оновлено: —";
+    }
+    sync(data.targets || []);
 
       // точки запуску (показуємо тільки активні)
       try{
