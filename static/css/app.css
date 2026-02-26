@@ -309,3 +309,35 @@ html[data-theme="light"] .leaflet-control-zoom a{
   background: rgba(255,255,255,.04);
 }
 .pvls-targets-item b{ font-weight: 800; }
+/* 1) Light info popup (readable on phone) */
+.leaflet-popup-content-wrapper{
+  background: rgba(255,255,255,0.96) !important;
+  color: #111 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 14px 40px rgba(0,0,0,.25) !important;
+}
+.leaflet-popup-tip{
+  background: rgba(255,255,255,0.96) !important;
+}
+.leaflet-popup-close-button{
+  color:#111 !important;
+  opacity:.7 !important;
+}
+.pvls-popup__title{ font-weight:900; font-size:18px; margin-bottom:6px; }
+.pvls-popup__row{ font-size:14px; line-height:1.35; margin:4px 0; }
+.pvls-popup__note{ margin-top:8px; font-weight:700; }
+.pvls-popup__time{ margin-top:10px; font-size:12px; opacity:.7; font-weight:700; }
+
+/* 2) Mobile topbar spacing (fix “squished”) */
+@media (max-width: 520px){
+  #topBar{ padding:10px 10px !important; gap:8px !important; }
+  #topTitle{ font-size:18px !important; line-height:1.15 !important; text-align:left !important; }
+  #topRight{ gap:8px !important; }
+  #count, #updated{ font-size:12px !important; padding:6px 10px !important; border-radius:14px !important; }
+  #infoBtn, #themeBtn{ width:40px !important; height:40px !important; border-radius:14px !important; }
+}
+
+/* 3) Hide Leaflet layer control on mobile (so you don’t get “two map buttons”) */
+@media (max-width: 520px){
+  .leaflet-control-layers{ display:none !important; }
+}
