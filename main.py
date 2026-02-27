@@ -1,12 +1,11 @@
 import json
 import os
-import time
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 import uuid
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -35,10 +34,13 @@ def _db_conn():
 
 
 def _db_init() -> None:
+    """Creates required tables and ensures newer columns exist."""
     if not os.getenv("DATABASE_URL") or psycopg2 is None:
         return
+
     with _db_conn() as conn:
         with conn.cursor() as cur:
+            # Targets
             cur.execute(
                 """
                 create table if not exists pvls_targets (
@@ -56,12 +58,11 @@ def _db_init() -> None:
                 );
                 """
             )
-            cur.execute(
-                """
 
             # ensure new columns exist (for old deployments)
             cur.execute("alter table pvls_targets add column if not exists dest_lat double precision;")
             cur.execute("alter table pvls_targets add column if not exists dest_lng double precision;")
+
             # launch sites persistence
             cur.execute(
                 """
@@ -74,6 +75,10 @@ def _db_init() -> None:
                 );
                 """
             )
+
+            # presence (optional)
+            cur.execute(
+                """
                 create table if not exists pvls_presence (
                     sid text primary key,
                     last_seen timestamptz not null
@@ -134,8 +139,7 @@ def _db_upsert_target(t: dict) -> None:
                     dest_lat=excluded.dest_lat,
                     dest_lng=excluded.dest_lng,
                     updated_at=now();
-                """
-                ,
+                """,
                 (
                     t.get("id"),
                     t.get("type"),
@@ -183,81 +187,6 @@ def _db_fetch_launchsites() -> list[dict]:
                 )
             return out
 
-def _db_seed_launchsites_if_empty() -> None:
-    # seed from LAUNCH_PATH / DEFAULT_LAUNCH_NAMES once
-    try:
-        with _db_conn() as conn:
-            with conn.cursor() as cur:
-                cur.execute("select count(*) from pvls_launchsites;")
-                n = int(cur.fetchone()[0])
-                if n > 0:
-                    return
-                items = []
-                if LAUNCH_PATH.exists():
-                    try:
-                        items = json.load(open(LAUNCH_PATH, "r", encoding="utf-8")) or []
-                    except Exception:
-                        items = []
-                if not items:
-                    items = [{"name": n, "lat": None, "lng": None, "active": False} for n in DEFAULT_LAUNCH_NAMES]
-                for s in items:
-                    name = (s.get("name") or "").strip()[:80]
-                    if not name:
-                        continue
-                    cur.execute(
-                        """insert into pvls_launchsites (name, lat, lng, active, updated_at)
-                        values (%s,%s,%s,%s, now())
-                        on conflict (name) do nothing;""",
-                        (name, s.get("lat"), s.get("lng"), bool(s.get("active"))),
-                    )
-    except Exception:
-        return
-
-def _db_upsert_launchsite(site: dict) -> None:
-    _db_init()
-    _db_seed_launchsites_if_empty()
-    with _db_conn() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                insert into pvls_launchsites (name, lat, lng, active, updated_at)
-                values (%s,%s,%s,%s, now())
-                on conflict (name) do update set
-                    lat=excluded.lat,
-                    lng=excluded.lng,
-                    active=excluded.active,
-                    updated_at=now();
-                """,
-                (
-                    site.get("name"),
-                    site.get("lat"),
-                    site.get("lng"),
-                    bool(site.get("active")),
-                ),
-            )
-def _load_targets() -> list:
-    try:
-        if os.getenv("DATABASE_URL") and psycopg2 is not None:
-            return _db_fetch_targets()
-        if not DATA_PATH.exists():
-            return []
-        with open(DATA_PATH, "r", encoding="utf-8") as f:
-            return json.load(f) or []
-    except Exception:
-        return []
-
-def _save_targets(items: list) -> None:
-    if os.getenv("DATABASE_URL") and psycopg2 is not None:
-        for t in items:
-            _db_upsert_target(t)
-        return
-    tmp = str(DATA_PATH) + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(items, f, ensure_ascii=False, indent=2)
-    os.replace(tmp, DATA_PATH)
-
-def _now_iso() -> str:
-    return datetime.now().isoformat(timespec="seconds")
 
 DEFAULT_LAUNCH_NAMES = [
     "Шаталово",
@@ -282,6 +211,94 @@ DEFAULT_LAUNCH_NAMES = [
 ]
 
 
+def _db_seed_launchsites_if_empty() -> None:
+    # seed from LAUNCH_PATH / DEFAULT_LAUNCH_NAMES once
+    try:
+        with _db_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("select count(*) from pvls_launchsites;")
+                n = int(cur.fetchone()[0])
+                if n > 0:
+                    return
+
+                items = []
+                if LAUNCH_PATH.exists():
+                    try:
+                        with open(LAUNCH_PATH, "r", encoding="utf-8") as f:
+                            items = json.load(f) or []
+                    except Exception:
+                        items = []
+
+                if not items:
+                    items = [{"name": n, "lat": None, "lng": None, "active": False} for n in DEFAULT_LAUNCH_NAMES]
+
+                for s in items:
+                    name = (s.get("name") or "").strip()[:80]
+                    if not name:
+                        continue
+                    cur.execute(
+                        """
+                        insert into pvls_launchsites (name, lat, lng, active, updated_at)
+                        values (%s,%s,%s,%s, now())
+                        on conflict (name) do nothing;
+                        """,
+                        (name, s.get("lat"), s.get("lng"), bool(s.get("active"))),
+                    )
+    except Exception:
+        return
+
+
+def _db_upsert_launchsite(site: dict) -> None:
+    _db_init()
+    _db_seed_launchsites_if_empty()
+    with _db_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                insert into pvls_launchsites (name, lat, lng, active, updated_at)
+                values (%s,%s,%s,%s, now())
+                on conflict (name) do update set
+                    lat=excluded.lat,
+                    lng=excluded.lng,
+                    active=excluded.active,
+                    updated_at=now();
+                """,
+                (
+                    site.get("name"),
+                    site.get("lat"),
+                    site.get("lng"),
+                    bool(site.get("active")),
+                ),
+            )
+
+
+def _load_targets() -> list:
+    try:
+        if os.getenv("DATABASE_URL") and psycopg2 is not None:
+            return _db_fetch_targets()
+        if not DATA_PATH.exists():
+            return []
+        with open(DATA_PATH, "r", encoding="utf-8") as f:
+            return json.load(f) or []
+    except Exception:
+        return []
+
+
+def _save_targets(items: list) -> None:
+    if os.getenv("DATABASE_URL") and psycopg2 is not None:
+        for t in items:
+            _db_upsert_target(t)
+        return
+    tmp = str(DATA_PATH) + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(items, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, DATA_PATH)
+
+
+def _now_iso() -> str:
+    return datetime.now().isoformat(timespec="seconds")
+
+
 def _load_launch_sites() -> list:
     try:
         if os.getenv("DATABASE_URL") and psycopg2 is not None:
@@ -300,9 +317,9 @@ def _load_launch_sites() -> list:
     except Exception:
         return [{"name": n, "lat": None, "lng": None, "active": False} for n in DEFAULT_LAUNCH_NAMES]
 
+
 def _save_launch_sites(items: list) -> None:
     if os.getenv("DATABASE_URL") and psycopg2 is not None:
-        # keep a json backup locally, but DB is source of truth
         for s in items:
             _db_upsert_launchsite(s)
         return
@@ -310,22 +327,25 @@ def _save_launch_sites(items: list) -> None:
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(items, f, ensure_ascii=False, indent=2)
     os.replace(tmp, LAUNCH_PATH)
+
+
 class TargetIn(BaseModel):
     type: str = Field(..., pattern=r"^[a-z0-9_]+$")
     lat: float
     lng: float
     direction: int = Field(0, ge=0, le=359)
     note: Optional[str] = None
-    # allow fast objects too (ракета/балістика)
     speed_kmh: float = Field(0, ge=0, le=20000)
     dest_lat: Optional[float] = None
     dest_lng: Optional[float] = None
+
 
 class LaunchSiteIn(BaseModel):
     name: str
     lat: Optional[float] = None
     lng: Optional[float] = None
     active: bool = False
+
 
 app = FastAPI(title="Pavlograd Sky Tactical Map")
 
@@ -336,9 +356,12 @@ def _startup():
         _db_init()
     except Exception:
         pass
+
+
 app.mount("/static", StaticFiles(directory=str(APP_DIR / "static")), name="static")
 
 presence = {}
+
 
 @app.post("/api/presence")
 def presence_ping(payload: dict):
@@ -356,14 +379,12 @@ def presence_ping(payload: dict):
 
 @app.get("/api/stats")
 def api_stats():
-    """Viewer stats: online users (best-effort) + last update time."""
     now = datetime.now().timestamp()
     cutoff = now - 60
     for k in list(presence.keys()):
         if presence.get(k, 0) < cutoff:
             presence.pop(k, None)
 
-    # last update from targets
     updated_at = None
     try:
         targets = _load_targets()
@@ -372,30 +393,33 @@ def api_stats():
     except Exception:
         updated_at = None
 
-    return JSONResponse({
-        "online": len(presence),
-        "updated_at": updated_at,
-    })
+    return JSONResponse({"online": len(presence), "updated_at": updated_at})
+
 
 @app.get("/", response_class=HTMLResponse)
 def root():
     return viewer()
 
+
 @app.get("/viewer", response_class=HTMLResponse)
 def viewer():
     return HTMLResponse((APP_DIR / "templates" / "viewer.html").read_text(encoding="utf-8"))
+
 
 @app.get("/admin", response_class=HTMLResponse)
 def admin():
     return HTMLResponse((APP_DIR / "templates" / "admin.html").read_text(encoding="utf-8"))
 
+
 @app.get("/api/targets")
 def get_targets():
     return JSONResponse({"updated_at": _now_iso(), "targets": _load_targets()})
 
+
 @app.get("/api/launchsites")
 def get_launch_sites():
     return JSONResponse({"updated_at": _now_iso(), "sites": _load_launch_sites()})
+
 
 @app.post("/api/launchsites")
 def upsert_launch_site(s: LaunchSiteIn):
@@ -404,14 +428,16 @@ def upsert_launch_site(s: LaunchSiteIn):
     if not name:
         raise HTTPException(status_code=400, detail="name required")
 
-    # DB mode: store launch sites persistently (Render filesystem is ephemeral)
     if os.getenv("DATABASE_URL") and psycopg2 is not None:
-        site = {"name": name,
-                "lat": float(s.lat) if s.lat is not None else None,
-                "lng": float(s.lng) if s.lng is not None else None,
-                "active": bool(s.active)}
+        site = {
+            "name": name,
+            "lat": float(s.lat) if s.lat is not None else None,
+            "lng": float(s.lng) if s.lng is not None else None,
+            "active": bool(s.active),
+        }
         _db_upsert_launchsite(site)
         return JSONResponse(site)
+
     found = None
     for x in items:
         if x.get("name") == name:
@@ -426,9 +452,9 @@ def upsert_launch_site(s: LaunchSiteIn):
     _save_launch_sites(items)
     return JSONResponse(found)
 
+
 @app.post("/api/targets")
 def add_target(t: TargetIn):
-    # Keep IDs stable across restarts
     new_id = f"t{int(datetime.now().timestamp()*1000)}_{uuid.uuid4().hex[:6]}"
     item = {
         "id": new_id,
@@ -451,6 +477,7 @@ def add_target(t: TargetIn):
         _save_targets(items)
     return JSONResponse(item)
 
+
 @app.delete("/api/targets/{target_id}")
 def delete_target(target_id: str):
     if os.getenv("DATABASE_URL") and psycopg2 is not None:
@@ -463,6 +490,7 @@ def delete_target(target_id: str):
         raise HTTPException(status_code=404, detail="not found")
     _save_targets(new_items)
     return JSONResponse({"ok": True})
+
 
 @app.post("/api/targets/{target_id}")
 def update_target(target_id: str, t: TargetIn):
@@ -490,6 +518,7 @@ def update_target(target_id: str, t: TargetIn):
             break
     if not found:
         raise HTTPException(status_code=404, detail="not found")
+
     found["type"] = t.type
     found["lat"] = float(t.lat)
     found["lng"] = float(t.lng)
@@ -501,6 +530,7 @@ def update_target(target_id: str, t: TargetIn):
     found["updated_at"] = _now_iso()
     _save_targets(items)
     return JSONResponse(found)
+
 
 if __name__ == "__main__":
     import uvicorn
