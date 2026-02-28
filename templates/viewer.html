@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pavlograd Sky • Online Map</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/static/js/rotatedmarker.js"></script>
+
+  <link rel="stylesheet" href="/static/css/app.css"/>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          Pavlograd Sky • Online Map
+          
+        </div>
+        <div class="right">
+          <button class="pill pill-btn" id="themeBtn" title="Тема">☾</button>
+          <button class="pill pill-btn" id="infoBtn" title="Інфо">i</button>
+          <div class="pill" id="count">Цілі: 0</div>
+          <div class="pill small" id="updated">Оновлено: —</div>
+        </div>
+      </div>
+    </header>
+
+    <main class="map-wrap">
+      <div id="map"></div>
+      <div class="wm-layer" id="wmLayer" data-theme="dark" aria-hidden="true"></div>
+
+      <div class="corner bl">
+        <a class="badge" href="https://t.me/pavlogradsky3" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit">
+          Pavlograd Sky
+          <span class="sub">t.me/pavlogradsky3</span>
+        </a>
+      </div>
+
+      <div class="corner br">
+        <div class="badge">
+          <span class="dot" id="onlineDot" aria-hidden="true"></span>Онлайн
+          <span class="sub" id="onlineCount">—</span>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-back" id="modalBack" role="dialog" aria-modal="true">
+    <div class="modal">
+      <h2>Інформація про мапу</h2>
+      <p>Це мапа Pavlograd Sky. Вона <b>не є офіційним ресурсом</b> і використовується для швидкої візуалізації ситуації.</p>
+      <p>Позначки на мапі <b>вносяться вручну адміністратором</b>. Дані можуть оновлюватися із затримкою або тимчасово бути відсутніми.</p>
+      <p>Будь ласка, звіряйте інформацію з офіційними джерелами.</p>
+      <div class="actions">
+        <button class="btn" id="closeModal">Зрозуміло</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/common.js"></script>
+  <script src="/static/js/viewer.js"></script>
+</body>
+</html>

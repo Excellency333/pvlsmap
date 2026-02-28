@@ -1,0 +1,30 @@
+
+
+select, .select, .field select{
+  background: rgba(18, 24, 32, .85) !important;
+  color: #EAF0F7 !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+}
+select:focus{
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(255,80,120,.18) !important;
+}
+select option{
+  background: #0E131A !important;
+  color: #EAF0F7 !important;
+}
+
+.compass{position:relative;width:160px;height:160px;margin-top:12px;border-radius:50%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12)}
+.compass-ring{position:absolute;inset:10px;border-radius:50%;border:1px dashed rgba(255,255,255,.22)}
+.compass-needle{position:absolute;left:50%;top:50%;width:2px;height:64px;background:rgba(255,80,120,.9);transform-origin:50% 100%;transform:translate(-50%,-100%) rotate(0deg);border-radius:2px;box-shadow:0 0 16px rgba(255,80,120,.35)}
+.compass-knob{position:absolute;left:50%;top:50%;width:18px;height:18px;border-radius:50%;background:#EAF0F7;transform:translate(-50%,-50%);box-shadow:0 0 0 3px rgba(255,80,120,.25);cursor:grab}
+.compass::after{content:"Пн";position:absolute;left:50%;top:6px;transform:translateX(-50%);font-weight:1000;opacity:.65}
+.compass::before{content:"Пд";position:absolute;left:50%;bottom:6px;transform:translateX(-50%);font-weight:1000;opacity:.65}
+.hint{font-size:12px;opacity:.7;margin-top:6px}
+@media (max-width: 920px){
+  .wrap.split{display:flex;flex-direction:column;height:100dvh}
+  .panel{position:fixed;left:0;right:0;bottom:0;z-index:9999;max-height:52dvh;overflow:auto;border-top-left-radius:18px;border-top-right-radius:18px}
+  .map-wrap{flex:1 1 auto;min-height:0}
+  .topbar{padding-top:calc(10px + env(safe-area-inset-top))}
+  .panel{padding-bottom:calc(18px + env(safe-area-inset-bottom))}
+}
