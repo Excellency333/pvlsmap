@@ -5,6 +5,10 @@ import hmac
 import hashlib
 import time
 from datetime import datetime
+try:
+    from zoneinfo import ZoneInfo
+except Exception:
+    ZoneInfo = None  # type: ignore
 from pathlib import Path
 from typing import Optional
 import uuid
@@ -50,7 +54,13 @@ DEFAULT_LAUNCH_NAMES = [
 
 
 def _now_iso() -> str:
-    return datetime.now().isoformat(t
+    """Return current time in Europe/Kyiv ISO string (seconds)."""
+    try:
+        if ZoneInfo is not None:
+            return datetime.now(ZoneInfo("Europe/Kyiv")).isoformat(timespec="seconds")
+    except Exception:
+        pass
+    return datetime.now().isoformat(timespec="seconds")
 # -----------------------------
 # Admin auth (signed cookie session, ENV-configured)
 # -----------------------------
