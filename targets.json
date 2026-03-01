@@ -1,0 +1,35 @@
+[
+  {
+    "id": "t1772046365866_8e9bec",
+    "type": "shahed",
+    "lat": -89.0203,
+    "lng": 126.5625,
+    "direction": 108,
+    "note": "",
+    "speed_kmh": 0.0,
+    "created_at": "2026-02-25T21:06:05",
+    "updated_at": "2026-02-25T21:06:44"
+  },
+  {
+    "id": "t1772046407297_1d57ef",
+    "type": "shahed",
+    "lat": -88.61863,
+    "lng": 111.09375,
+    "direction": 0,
+    "note": "",
+    "speed_kmh": 0.0,
+    "created_at": "2026-02-25T21:06:47",
+    "updated_at": "2026-02-25T21:06:47"
+  },
+  {
+    "id": "t1772047433160_10ef46",
+    "type": "shahed",
+    "lat": 48.56386,
+    "lng": 35.68359,
+    "direction": 0,
+    "note": "",
+    "speed_kmh": 0.0,
+    "created_at": "2026-02-25T21:23:53",
+    "updated_at": "2026-02-25T21:23:53"
+  }
+]

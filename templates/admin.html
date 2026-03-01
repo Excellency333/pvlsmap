@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pavlograd Sky • Admin</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/static/js/rotatedmarker.js"></script>
+  <link rel="stylesheet" href="/static/css/admin.css?v=34"/>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          Pavlograd Sky • Admin
+          <span class="sub">Додавання / редагування цілей</span>
+        </div>
+        <div class="right">
+          <a class="pill" href="/viewer" target="_blank" rel="noopener">Перегляд</a>
+      <a class="pill pill-btn" href="/admin/logout">Вийти</a>
+          <button class="pill" id="btnTheme" type="button">Світла</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="wrap split">
+      <main class="map-wrap">
+        <div id="map"></div>
+      </main>
+
+      <aside class="panel">
+        <div class="row"><h3 style="margin:0 0 10px;font-weight:1000">Додати / редагувати ціль</h3></div>
+
+        <div class="row">
+          <label>Тип</label>
+          <select id="type"></select>
+        </div>
+
+        <div class="row">
+          <label>Швидкість (км/год)</label>
+          <input id="speed" placeholder="наприклад 200" />
+        </div>
+
+        <div class="row">
+          <label>Координати</label>
+          <input id="lat" placeholder="lat" />
+          <div style="height:8px"></div>
+          <input id="lng" placeholder="lng" />
+
+          <div id="destWrap" style="display:none;margin-top:10px">
+            <label style="margin-top:6px">Куди летить (для балістики)</label>
+            <input id="destLat" placeholder="dest lat" />
+            <div style="height:8px"></div>
+            <input id="destLng" placeholder="dest lng" />
+            <div style="margin-top:8px;color:rgba(255,255,255,.65);font-weight:800;font-size:12px">
+              Клік 1 на мапі: старт. Клік 2: кінцева точка.
+            </div>
+          </div>
+
+          <div style="margin-top:8px;color:rgba(255,255,255,.65);font-weight:800;font-size:12px">
+            Ткни на мапі або перетягни мітку. Потім натисни <b>Зберегти</b>.
+          </div>
+        </div>
+
+        <div class="row">
+          <label>Напрямок</label>
+          <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
+            <select id="courseText" style="flex:1"></select>
+            <div class="pill muted" id="dirVal">0°</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <input id="dir" type="range" min="0" max="359" value="0" style="flex:1" />
+          </div>
+
+          <div class="compass" id="compass" aria-label="Компас">
+            <div class="compass-ring"></div>
+            <div class="compass-needle" id="needle"></div>
+            <div class="compass-knob" id="knob" title="Потягни, щоб задати курс"></div>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+            <button class="btn small" id="minus15">-15°</button>
+            <button class="btn small" id="minus5">-5°</button>
+            <button class="btn small" id="plus5">+5°</button>
+            <button class="btn small" id="plus15">+15°</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <label>Нотатка (опц.)</label>
+          <textarea id="note" placeholder="Напр.: курс на місто"></textarea>
+        </div>
+
+        <div class="row row-inline">
+          <label class="switch">
+            <input type="checkbox" id="active" checked />
+            <span>Активна ціль</span>
+          </label>
+        </div>
+
+        <div class="row" style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn primary" id="save">Зберегти</button>
+          <button class="btn" id="new">Нова</button>
+          <button class="btn" id="delete">Видалити</button>
+          <button class="btn danger" id="deleteAll">Видалити всі</button>
+        </div>
+
+        <div class="row" style="margin-top:14px">
+          <div style="font-weight:1000;margin-bottom:8px">Список цілей</div>
+          <div id="list"></div>
+        </div>
+
+        <div class="row" style="margin-top:14px">
+          <div style="font-weight:1000;margin-bottom:8px">Точки запуску БПЛА</div>
+          <div style="color:rgba(255,255,255,.65);font-weight:800;font-size:12px;margin-bottom:8px">
+            Вибери точку, потім клікни на мапі щоб задати координати. Статус можна перемикати.
+          </div>
+          <div id="launchList"></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script src="/static/js/common.js?v=31?v=31"></script>
+  <script src="/static/js/admin.js?v=34?v=31"></script>
+</body>
+</html>
