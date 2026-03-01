@@ -1,0 +1,364 @@
+
+:root{
+  --bg: #0b0f1a;
+  --glass: rgba(18,22,36,.34);
+  --glass2: rgba(255,255,255,.08);
+  --stroke: rgba(255,255,255,.10);
+  --text: rgba(255,255,255,.92);
+  --muted: rgba(255,255,255,.62);
+  --red: #ff3b5b;
+  --shadow: 0 18px 60px rgba(0,0,0,.45);
+  --radius: 18px;
+  --blur: 18px;
+  --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue";
+}
+
+/* Light theme overrides (viewer/admin toggle sets html[data-theme]) */
+html[data-theme="light"]{
+  --bg: #fff2f3;
+  --glass: rgba(255,255,255,.72);
+  --glass2: rgba(255,255,255,.68);
+  --stroke: rgba(18,21,34,.14);
+  --text: rgba(18,21,34,.92);
+  --muted: rgba(18,21,34,.62);
+  --shadow: 0 18px 60px rgba(0,0,0,.18);
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:radial-gradient(1200px 500px at 15% 0%, rgba(255,59,91,.22), transparent 55%), var(--bg); color:var(--text); font-family:var(--font);} 
+html[data-theme="light"] body{background:radial-gradient(1200px 500px at 15% 0%, rgba(255,59,91,.10), transparent 55%), var(--bg);} 
+a{color:inherit}
+/* App shell */
+.app{height:100dvh;min-height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.topbar{
+  position:relative;
+  flex:0 0 auto;
+  padding:10px 14px;
+  background:linear-gradient(180deg, rgba(18,22,36,.38), rgba(18,22,36,.26));
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  border-bottom:1px solid var(--stroke);
+}
+.topbar-inner{display:flex;align-items:center;justify-content:center;position:relative;gap:12px}
+.brand{
+  font-weight:900;
+  letter-spacing:.4px;
+  font-size:18px;
+  line-height:1.1;
+  text-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+.brand .sub{
+  display:block;
+  margin-top:2px;
+  font-size:12px;
+  font-weight:700;
+  color:var(--muted);
+  letter-spacing:.2px;
+}
+.right{
+  position:absolute;
+  right:14px;
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+.pill{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  padding:8px 12px;
+  border-radius:999px;
+  background:var(--glass2);
+  border:1px solid var(--stroke);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  box-shadow: 0 10px 30px rgba(0,0,0,.22);
+  font-weight:800;
+  font-size:12px;
+  color:var(--text);
+}
+.pill.small{padding:8px 10px}
+.pill-btn{
+  width:38px;height:38px;justify-content:center;padding:0;cursor:pointer;
+}
+/* Map zone */
+.map-wrap{position:relative;flex:1 1 auto;min-height:0}
+#map{position:absolute;inset:0}
+/* Mobile: allow smooth drag without page scrolling */
+#map{touch-action:none;}
+/* Watermark overlay */
+/* Bottom chips */
+.corner{
+  position:absolute;
+  z-index:9999;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.corner.bl{left:14px;bottom:14px}
+.corner.br{right:14px;bottom:14px}
+.badge{
+  padding:10px 12px;
+  border-radius:16px;
+  background:linear-gradient(180deg, rgba(18,22,36,.38), rgba(18,22,36,.26));
+  border:1px solid var(--stroke);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  box-shadow: var(--shadow);
+  font-weight:900;
+  font-size:13px;
+  line-height:1.2;
+}
+.badge .sub{display:block;margin-top:3px;font-weight:800;font-size:11px;color:var(--muted)}
+/* Modal */
+.modal-back{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.55);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:2000;
+}
+.modal{
+  width:min(720px, calc(100vw - 28px));
+  border-radius:22px;
+  background:rgba(20,24,40,.72);
+  border:1px solid rgba(255,255,255,.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 30px 100px rgba(0,0,0,.55);
+  padding:18px 18px 16px;
+}
+.modal h2{margin:0 0 10px;font-size:16px;font-weight:1000}
+.modal p{margin:0 0 10px;color:rgba(255,255,255,.78);font-weight:700;line-height:1.35;font-size:13px}
+.modal .actions{display:flex;justify-content:flex-end;margin-top:10px}
+.modal .btn{
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+  border-radius:14px;
+  padding:10px 12px;
+  font-weight:900;
+  cursor:pointer;
+}
+/* Leaflet polish */
+.leaflet-control-zoom a{
+  background:rgba(20,24,40,.55) !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  color:rgba(255,255,255,.92) !important;
+  backdrop-filter: blur(var(--blur));
+}
+.leaflet-control-zoom{border:none !important}
+.leaflet-control-layers{
+  border-radius:16px !important;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.12) !important;
+  background:rgba(20,24,40,.55) !important;
+  backdrop-filter: blur(var(--blur));
+}
+.leaflet-control-layers-toggle{
+  width:44px !important;
+  height:44px !important;
+  background-image:none !important;
+}
+.leaflet-control-layers-toggle:before{
+  content:"🗺️";
+  display:block;
+  width:44px;height:44px;line-height:44px;
+  text-align:center;
+  font-size:18px;
+}
+.leaflet-popup-content-wrapper{
+  background:rgba(255,255,255,.86) !important;
+  color:rgba(12,14,22,.92) !important;
+  border:1px solid rgba(0,0,0,.10) !important;
+  backdrop-filter: blur(18px);
+  border-radius:18px !important;
+}
+.leaflet-popup-tip{
+  background:rgba(255,255,255,.86) !important;
+}
+
+/* Admin layout */
+.wrap.split{display:grid;grid-template-columns: 1fr 360px;gap:12px;height:calc(100vh - 64px);padding:12px;min-height:0}
+@media (max-width: 980px){.wrap.split{grid-template-columns:1fr;height:auto}.panel{order:-1}}
+.panel{
+  position:relative;
+  z-index:1200;
+  border-radius:20px;
+  background:rgba(18,22,36,.34);
+  border:1px solid rgba(255,255,255,.12);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: var(--shadow);
+  padding:14px;
+  overflow:auto;
+}
+.panel .row{margin-bottom:10px}
+.panel label{display:block;font-size:12px;font-weight:900;color:rgba(255,255,255,.78);margin-bottom:6px}
+.panel input,.panel select,.panel textarea{
+  width:100%;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.08);
+  color:rgba(255,255,255,.92);
+  padding:10px 12px;
+  outline:none;
+  font-weight:800;
+}
+.panel textarea{min-height:74px;resize:vertical}
+.btn{
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.08);
+  color:rgba(255,255,255,.92);
+  border-radius:14px;
+  padding:10px 12px;
+  font-weight:1000;
+  cursor:pointer;
+}
+.btn.small{padding:8px 10px;font-size:12px}
+.btn.primary{background:rgba(255,59,91,.18);border-color:rgba(255,59,91,.35)}
+.pill.muted{color:rgba(255,255,255,.62)}
+/* Make map container correct in admin too */
+.map{position:relative;min-height:0}
+
+/* Watermark overlay (theme swaps via JS) */
+
+.wm-layer{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  /* Above Leaflet panes (markers are ~600-700). Keep watermark always visible */
+  z-index:1200;
+  background-repeat:repeat;
+  background-position:0 0;
+  /* дрібніше й частіше */
+  background-size:520px 280px;
+  /* помітно, але не заважає */
+  opacity:.52;
+}
+.wm-layer[data-theme="dark"]{
+  background-image:url('/static/img/watermark_dark.png');
+}
+.wm-layer[data-theme="light"]{
+  background-image:url('/static/img/watermark_light.png');
+}
+
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:middle;background:rgba(150,150,150,.6);box-shadow:none}
+.dot.on{background:rgba(60,255,140,.92);box-shadow:0 0 0 3px rgba(60,255,140,.18), 0 0 18px rgba(60,255,140,.65)}
+.dot.off{background:rgba(255,90,90,.9);box-shadow:0 0 0 3px rgba(255,90,90,.16), 0 0 18px rgba(255,90,90,.45)}
+
+/* Leaflet controls - readable on both themes */
+.leaflet-bar a,
+.leaflet-control-zoom a{
+  background: rgba(18,22,28,.68) !important;
+  color: rgba(255,255,255,.92) !important;
+  border-color: rgba(255,255,255,.14) !important;
+}
+html[data-theme="light"] .leaflet-bar a,
+html[data-theme="light"] .leaflet-control-zoom a{
+  background: rgba(255,255,255,.88) !important;
+  color: rgba(10,12,18,.92) !important;
+  border-color: rgba(0,0,0,.14) !important;
+}
+
+/* --- Viewer panels (info / targets) --- */
+.pvls-backdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: 1999;
+}
+.pvls-panel{
+  position: fixed;
+  top: 70px;
+  right: 14px;
+  width: min(420px, calc(100vw - 28px));
+  max-height: calc(100vh - 90px);
+  overflow: auto;
+  background: rgba(18,22,30,.92);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0,0,0,.35);
+  z-index: 2000;
+  color: rgba(255,255,255,.92);
+  backdrop-filter: blur(14px);
+}
+.pvls-panel.hidden, .pvls-backdrop.hidden{ display:none; }
+.pvls-panel__head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 12px 12px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.pvls-panel__title{ font-weight: 700; }
+.pvls-panel__body{ padding: 12px; font-size: 14px; line-height: 1.35; }
+.pvls-btn{
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.92);
+  border-radius: 10px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.pvls-targets-list{ display:flex; flex-direction:column; gap:10px; }
+.pvls-targets-item{
+  padding:10px;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 12px;
+  background: rgba(255,255,255,.04);
+}
+.pvls-targets-item b{ font-weight: 800; }
+/* 1) Light info popup (readable on phone) */
+.leaflet-popup-content-wrapper{
+  background: rgba(255,255,255,0.96) !important;
+  color: #111 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 14px 40px rgba(0,0,0,.25) !important;
+}
+.leaflet-popup-tip{
+  background: rgba(255,255,255,0.96) !important;
+}
+.leaflet-popup-close-button{
+  color:#111 !important;
+  opacity:.7 !important;
+}
+.pvls-popup__title{ font-weight:900; font-size:18px; margin-bottom:6px; }
+.pvls-popup__row{ font-size:14px; line-height:1.35; margin:4px 0; }
+.pvls-popup__note{ margin-top:8px; font-weight:700; }
+.pvls-popup__time{ margin-top:10px; font-size:12px; opacity:.7; font-weight:700; }
+
+/* 2) Mobile topbar spacing (fix “squished”) */
+@media (max-width: 520px){
+  #topBar{ padding:10px 10px !important; gap:8px !important; }
+  #topTitle{ font-size:18px !important; line-height:1.15 !important; text-align:left !important; }
+  #topRight{ gap:8px !important; }
+  #count, #updated{ font-size:12px !important; padding:6px 10px !important; border-radius:14px !important; }
+  #infoBtn, #themeBtn{ width:40px !important; height:40px !important; border-radius:14px !important; }
+}
+
+/* 3) Hide Leaflet layer control on mobile (so you don’t get “two map buttons”) */
+@media (max-width: 520px){
+  .leaflet-control-layers{ display:none !important; }
+}
+
+
+/* Target glow */
+.pvls-divicon{ background: transparent !important; border:0 !important; }
+.pvls-icon-img{ width:42px; height:42px; display:block; }
+.pvls-divicon.active .pvls-icon-img{ filter: drop-shadow(0 0 10px rgba(255, 30, 70, .85)) drop-shadow(0 0 20px rgba(255, 30, 70, .35)); }
+.pvls-divicon.inactive .pvls-icon-img{ filter: drop-shadow(0 0 10px rgba(40, 220, 140, .75)) drop-shadow(0 0 18px rgba(40, 220, 140, .25)); }
+
+/* Light theme – red glass, not pink */
+html[data-theme="light"] .topbar{
+  background: linear-gradient(180deg, rgba(150, 0, 28, .18), rgba(255, 255, 255, .62));
+}
+html[data-theme="light"] .pill,
+html[data-theme="light"] .iconbtn{
+  background: rgba(255,255,255,.70);
+  border-color: rgba(120,0,18,.20);
+}
+html[data-theme="light"] .feed{
+  background: rgba(255,255,255,.72);
+  border-color: rgba(120,0,18,.20);
+}
