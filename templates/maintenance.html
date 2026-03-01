@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Pavlograd Sky • Технічні роботи</title>
+  <link rel="stylesheet" href="/static/css/app.css?v=36" />
+</head>
+<body>
+  <div class="maint-wrap">
+    <div class="maint-card">
+      <div class="maint-title">Pavlograd Sky</div>
+      <div class="maint-sub">Технічні роботи</div>
+      <div class="maint-text">Оновлюємо інтерфейс та стабільність карти. Скоро повернемось.</div>
+
+      <div class="maint-hint">Якщо ти адміністратор — введи пароль доступу.</div>
+
+      <form id="maintForm" class="maint-form">
+        <input id="mpass" class="maint-input" type="password" placeholder="пароль доступу" required />
+        <button class="maint-btn" type="submit">Увійти</button>
+      </form>
+      <div id="merr" class="maint-error" style="display:none"></div>
+    </div>
+  </div>
+
+<script>
+document.getElementById('maintForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const p = document.getElementById('mpass').value;
+  const err = document.getElementById('merr');
+  err.style.display='none';
+  try{
+    const res = await fetch('/maintenance/login', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({password: p})
+    });
+    if(!res.ok){
+      err.textContent = 'Невірний пароль';
+      err.style.display='block';
+      return;
+    }
+    location.href = '/viewer';
+  }catch(ex){
+    err.textContent='Помилка підключення. Спробуй ще раз.';
+    err.style.display='block';
+  }
+});
+</script>
+</body>
+</html>
