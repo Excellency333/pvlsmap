@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Pavlograd Sky • Online Map v0.1</title>
+  <link rel="icon" type="image/png" href="/static/img/favicon.png">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/static/js/rotatedmarker.js"></script>
+
+  <link rel="stylesheet" href="/static/css/app.css?v=__BUILD__"/>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <span class="brand-title">Pavlograd Sky</span>
+          <span class="brand-sub">Online Map v0.1</span>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="pill pill-btn" id="filtersBtn" title="Фільтри" aria-label="Фільтри">☰</button>
+          <button class="pill pill-btn" id="legendBtn" title="Легенда" aria-label="Легенда">?</button>
+          <button class="pill pill-btn" id="measureBtn" title="Лінійка" aria-label="Лінійка">📏</button>
+          <button class="pill pill-btn" id="themeBtn" title="Тема" aria-label="Тема">☾</button>
+          <button class="pill pill-btn" id="infoBtn" title="Інфо" aria-label="Інфо">i</button>
+          <button class="pill pill-btn" id="feedToggle" title="Події" aria-label="Події">📰</button>
+        </div>
+
+        <div class="topbar-meta">
+          <div class="pill" id="count">Цілі: 0</div>
+          <div class="pill small" id="updated">Оновлено: —</div>
+        </div>
+      </div>
+    </header>
+
+    <main class="map-wrap">
+      <div id="map"></div>
+      <div class="wm-layer" id="wmLayer" data-theme="dark" aria-hidden="true"></div>
+
+      <div class="corner bl">
+        <a class="badge" href="https://t.me/pavlogradsky3" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit">
+          Pavlograd Sky
+          <span class="sub">t.me/pavlogradsky3</span>
+        </a>
+      </div>
+
+      <div class="corner br">
+        <div class="badge">
+          <span class="dot" id="onlineDot" aria-hidden="true"></span>Онлайн
+          <span class="sub" id="onlineCount">—</span>
+        </div>
+      </div>
+
+      <!-- Live feed -->
+      <section class="feed" id="feed" aria-label="Події">
+        <div class="feed-head">
+          <div class="feed-title">Події</div>
+          <div class="feed-actions">
+            <button class="iconbtn" id="feedClear" title="Очистити" aria-label="Очистити">🧹</button>
+            <button class="iconbtn" id="feedClose" title="Закрити" aria-label="Закрити">✕</button>
+          </div>
+        </div>
+        <div class="feed-list" id="feedList"></div>
+      </section>
+
+      <!-- Drawers -->
+      <aside class="drawer" id="drawerFilters" aria-label="Фільтри">
+        <div class="drawer-head">
+          <div class="drawer-title">Фільтри</div>
+          <button class="iconbtn" data-close="drawerFilters" aria-label="Закрити">✕</button>
+        </div>
+
+        <div class="drawer-body">
+          <div class="tog">
+            <label><input type="checkbox" class="flt" value="shahed" checked> Шахед</label>
+            <label><input type="checkbox" class="flt" value="gerbera" checked> Гербера</label>
+            <label><input type="checkbox" class="flt" value="recon" checked> Розвід-дрон</label>
+            <label><input type="checkbox" class="flt" value="fpv" checked> FPV</label>
+          </div>
+          <div class="tog">
+            <label><input type="checkbox" class="flt" value="cruise" checked> Крилата</label>
+            <label><input type="checkbox" class="flt" value="ballistic" checked> Балістика</label>
+            <label><input type="checkbox" class="flt" value="aircraft" checked> Авіація</label>
+            <label><input type="checkbox" class="flt" value="unknown" checked> Невідомо</label>
+          </div>
+
+          <div class="sep"></div>
+
+          <label class="row">
+            <input type="checkbox" id="showRoutes" checked>
+            <span>Маршрути</span>
+          </label>
+
+          <label class="row">
+            <input type="checkbox" id="onlyActive" checked>
+            <span>Лише активні</span>
+          </label>
+
+          <label class="row">
+            <input type="checkbox" id="effectsToggle" checked>
+            <span>Ефекти та анімації</span>
+          </label>
+
+          <div class="hint">
+            Якщо телефон слабкий, вимкни ефекти - мапа буде легшою.
+          </div>
+        </div>
+      </aside>
+
+      <aside class="drawer" id="drawerLegend" aria-label="Легенда">
+        <div class="drawer-head">
+          <div class="drawer-title">Легенда</div>
+          <button class="iconbtn" data-close="drawerLegend" aria-label="Закрити">✕</button>
+        </div>
+
+        <div class="drawer-body legend">
+          <div class="legend-row"><span class="lg-dot lg-red"></span> Активна ціль</div>
+          <div class="legend-row"><span class="lg-dot lg-gray"></span> Неактивна (історія)</div>
+          <div class="legend-row"><span class="lg-line"></span> Напрямок/маршрут</div>
+          <div class="sep"></div>
+          <div class="hint">
+            📏 Лінійка: натисни кнопку та став точки на мапі. Подвійний тап/клік — завершити.
+          </div>
+        </div>
+      </aside>
+
+      <!-- Measure HUD -->
+      <div class="measure-hud" id="measureHud" aria-hidden="true">
+        <div class="measure-card">
+          <div class="measure-title">Лінійка</div>
+          <div class="measure-sub" id="measureText">Торкнись мапи, щоб поставити першу точку</div>
+          <div class="measure-actions">
+            <button class="btn-sm" id="measureUndo">Назад</button>
+            <button class="btn-sm" id="measureClear">Очистити</button>
+            <button class="btn-sm primary" id="measureDone">Готово</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <div class="modal-back" id="modalBack" role="dialog" aria-modal="true">
+    <div class="modal">
+      <h2>Інформація про мапу</h2>
+      <p>Це мапа Pavlograd Sky. Вона <b>не є офіційним ресурсом</b> і використовується для швидкої візуалізації ситуації.</p>
+      <p>Позначки на мапі <b>вносяться вручну адміністратором</b>. Дані можуть оновлюватися із затримкою або тимчасово бути відсутніми.</p>
+      <p>Будь ласка, звіряйте інформацію з офіційними джерелами.</p>
+      <p><b>Підсвітка цілей:</b> 🟥 Є пуски БпЛА (червона підсвітка), 🟩 немає пусків БпЛА (зелена підсвітка).</p>
+      <div class="actions">
+        <button class="btn" id="closeModal">Зрозуміло</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/common.js?v=__BUILD__"></script>
+  <script src="/static/js/viewer.js?v=__BUILD__"></script>
+</body>
+</html>
